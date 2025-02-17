@@ -1,3 +1,6 @@
+# custom
+temp*.ipynb
+
 useless/
 storage/
 slurm_logs/
