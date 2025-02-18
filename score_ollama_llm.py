@@ -60,19 +60,14 @@ invalid_action_message = "Invalid action, the valid actions are: " + ", ".join(a
 invalid_action_message += "Please output one of the above actions and nothing else."
 
 
-def llm_score_ollama(model_name="llama3.2", env_name="BabyAI-GoToObj-v0", num_episodes=10, max_invalid_per_step=5, verbose=False):
+def score_ollama_llm(model_name="llama3.2", env_name="BabyAI-GoToObj-v0", num_episodes=10, max_invalid_per_step=5, verbose=False):
     
     env = gym.make("BabyAI-GoToObj-v0")
     env.seed(0) # for consistancy
     rewards = []
     invalid_actions_per_episode = []
     
-    # Create progress bar if not in verbose mode
-    episodes = range(num_episodes)
-    if not verbose:
-        episodes = tqdm(episodes, desc="Episodes", unit="episode")
-    
-    for episode in episodes:
+    for episode in tqdm(range(num_episodes), desc="Episodes", unit="episode"):
         
         obs, info = env.reset()
         goal = obs["mission"]
@@ -139,6 +134,6 @@ def llm_score_ollama(model_name="llama3.2", env_name="BabyAI-GoToObj-v0", num_ep
 
 
 if __name__ == "__main__":
-    rewards, invalid_actions = llm_score_ollama(num_episodes=2, max_invalid_per_step=5, verbose=False)
+    rewards, invalid_actions = score_ollama_llm(num_episodes=2, max_invalid_per_step=5, verbose=False)
     print("Rewards:", rewards)
     print("Invalid actions per episode:", invalid_actions)
