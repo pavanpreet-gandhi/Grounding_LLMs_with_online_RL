@@ -51,21 +51,28 @@ def llm_choose_action(generator, mission, descriptions):
         f"You are an agent in a simple navigation game. Your goal is to: {mission}.\n\n"
         f"Current observation:\n{obs_text}\n\n"
         f"You can choose ONE of these actions: {', '.join(text_to_action.keys())}.\n"
-        "Which action will you take next? Respond with exactly one action from the list."
+        "Which action will you take next? Respond with exactly one action from the list.\n"
+        "First, think step-by-step about what might be the best action to take, considering the current observation. \n"
+        # "Then, after the word 'Final action:', write the action you want to take.\n"
     )
 
     # Generate a short response
     response = generator(
         prompt,
-        max_new_tokens=20,  # limit the generation length
+        max_new_tokens=50,  # limit the generation length
         do_sample=True,
         top_p=0.9,
         truncation=True,
     )[0]["generated_text"].lower()
 
+    print("llm prompt:", response[: len(prompt)])
+    print("llm response:", response[len(prompt) :])
+    # print("llm response extractor:", response.split("final action:")[-1])
     # Attempt to find a valid action in the LLM output
     for action_str, action_id in text_to_action.items():
-        if action_str in response:
+        # if action_str in response[len(prompt) :]:
+        if action_str in response[-10:]:
+            # if action_str in response.split("final action:")[-1]:
             return action_id
 
     # If nothing matches, default to "done" (or any fallback you want)
@@ -115,14 +122,15 @@ def run_episode(env, generator):
 
 def main():
     print("Loading small LLM from Hugging Face (distilgpt2)...")
-    generator = pipeline("text-generation", model="distilgpt2")
+    # generator = pipeline("text-generation", model="distilgpt2")
+    generator = pipeline("text-generation", model="gpt2-medium")
     print("LLM loaded.\n")
 
     # Create your BabyAI environment
     env = gym.make("BabyAI-MixedTrainLocal-v0")
 
     # Run a couple of episodes with LLM-driven actions
-    num_episodes = 2
+    num_episodes = 1
     for i in range(num_episodes):
         print(f"=== Starting Episode {i+1} ===")
         run_episode(env, generator)
